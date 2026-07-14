@@ -3,9 +3,58 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <title>JSP Page</title>
+        <title>Login Usuario</title>
+        <link rel="stylesheet" href="${pageContext.request.contextPath}/css/login.css">
     </head>
     <body>
-        <h1>Hello World!</h1>
+        <main class="auth-main">
+            <div class="auth-container">
+                <div class="auth-line"></div>
+
+                <div class="auth-card">
+                    <a href="${pageContext.request.contextPath}/index.jsp" class="back-link">&larr; Volver al inicio</a>
+
+                    <h1 class="auth-title">Iniciar Sesión</h1>
+                    <p class="auth-subtitle">Ingresa tu correo y contraseña para continuar</p>
+
+                    <%-- Mensaje de error enviado por el servlet (request.setAttribute("error", "...")) --%>
+                    <c:if test="${not empty error}">
+                        <div class="alert alert-error">${error}</div>
+                    </c:if>
+
+                    <%-- Mensaje de éxito, por ejemplo tras registrarse (?registro=ok) --%>
+                    <c:if test="${param.registro == 'ok'}">
+                        <div class="alert alert-success">Cuenta creada correctamente. Ya puedes iniciar sesión.</div>
+                    </c:if>
+
+                    <form id="formLogin" action="${pageContext.request.contextPath}/Login" method="post" novalidate>
+
+                        <div class="form-group">
+                            <label for="correo">Correo electrónico</label>
+                            <input type="email" id="correo" name="correo" placeholder="tucorreo@ejemplo.com"
+                                   value="${correo}" required autocomplete="email">
+                            <span class="field-error" id="errorCorreo">Ingresa un correo válido.</span>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="contrasena">Contraseña</label>
+                            <div class="password-wrapper">
+                                <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña"
+                                       required autocomplete="current-password">
+                                <button type="button" class="toggle-password" data-target="contrasena">Ver</button>
+                            </div>
+                            <span class="field-error" id="errorContrasena">La contraseña es obligatoria.</span>
+                        </div>
+
+                        <button type="submit" class="btn-auth">Entrar</button>
+                    </form>
+
+                    <p class="auth-footer-link">
+                        ¿No tienes cuenta? <a href="${pageContext.request.contextPath}/registroUsuario.jsp">Regístrate aquí</a>
+                    </p>
+                </div>
+            </div>
+        </main>
+        <script src="${pageContext.request.contextPath}/js/ojitoContrasena.js"></script>
     </body>
 </html>
