@@ -71,7 +71,7 @@ public class SRegistrarUsuario extends HttpServlet
         usuario.setPaterno(paterno.trim());
         usuario.setMaterno(materno.trim());
         usuario.setContrasena(contrasena);
-        usuario.setTipoUsuario("Usuario");
+        usuario.setTipoUsuario("Alumno");
 
         try
         {
@@ -92,7 +92,8 @@ public class SRegistrarUsuario extends HttpServlet
             response.sendRedirect(request.getContextPath() + "/VerificarCuenta");
 
         }
-        catch (DAOUsuario.CorreoDuplicadoException | DAOUsuario.MatriculaDuplicadaException e)
+        catch (DAOUsuario.CorreoDuplicadoException | DAOUsuario.MatriculaDuplicadaException
+                | DAOUsuario.AlumnoNoEncontradoException e)
         {
             reenviarConError(request, response, e.getMessage(), matricula, correo, nombre, paterno, materno);
 

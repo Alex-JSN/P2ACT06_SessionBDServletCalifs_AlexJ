@@ -10,10 +10,11 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Vista de gestión de materias. Solo accesible para TipoUsuario = 'Administrador'.
+ * Landing page a la que llega un usuario con TipoUsuario = 'Administrador'
+ * después de iniciar sesión (ver SAutenticarUsuario).
  */
-@WebServlet(name = "SMaterias", urlPatterns = {"/SMaterias"})
-public class SMateria extends HttpServlet
+@WebServlet(name = "SPanelAdmin", urlPatterns = {"/PanelAdmin"})
+public class SPanelAdmin extends HttpServlet
 {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -26,14 +27,16 @@ public class SMateria extends HttpServlet
             response.sendRedirect(request.getContextPath() + "/SLogin?vista=login");
             return;
         }
+
         if (!"Administrador".equals(session.getAttribute("tipoUsuario")))
         {
+            // Un alumno no debe poder entrar aquí solo por conocer la URL.
             response.sendRedirect(request.getContextPath() + "/SCalificaciones");
             return;
         }
 
         response.setContentType("text/html;charset=UTF-8");
-        request.getRequestDispatcher("/materia.jsp").forward(request, response);
+        request.getRequestDispatcher("/panelAdmin.jsp").forward(request, response);
     }
 
     @Override

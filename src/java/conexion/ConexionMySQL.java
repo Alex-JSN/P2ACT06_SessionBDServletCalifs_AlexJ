@@ -24,7 +24,7 @@ public class ConexionMySQL
         }
         
         servidor = "localhost";
-        nombreBD = "dwi_27_ejemplo";
+        nombreBD = "dwi_28_ejemplo";
         usuario = "root";
         password = "Hydra2026!Dev";
         puerto = "3306";

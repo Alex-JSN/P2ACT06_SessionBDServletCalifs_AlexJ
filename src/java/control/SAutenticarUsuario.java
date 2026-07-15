@@ -50,20 +50,18 @@ public class SAutenticarUsuario extends HttpServlet
             HttpSession session = request.getSession(true);
             session.setAttribute("usuario", usuario);
             session.setAttribute("idUsuario", usuario.getIdUsuario());
+            session.setAttribute("idAlumno", usuario.getIdAlumno());
             session.setAttribute("tipoUsuario", usuario.getTipoUsuario());
             session.setMaxInactiveInterval(30 * 60); // 30 min
 
-            // Ajusta estas rutas a tus vistas reales según el tipo de usuario
+            // TipoUsuario solo puede ser 'Administrador' o 'Alumno' (enum de la tabla usuarios)
             switch (usuario.getTipoUsuario())
             {
                 case "Administrador":
-                    response.sendRedirect(request.getContextPath() + "/SMaterias");
-                    break;
-                case "Docente":
-                    response.sendRedirect(request.getContextPath() + "/SCalificaciones");
+                    response.sendRedirect(request.getContextPath() + "/PanelAdmin");
                     break;
                 default:
-                    response.sendRedirect(request.getContextPath() + "/SAlumno");
+                    response.sendRedirect(request.getContextPath() + "/SCalificaciones");
             }
 
         }

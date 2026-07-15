@@ -17,11 +17,6 @@
                     <h1 class="auth-title">Crear Cuenta</h1>
                     <p class="auth-subtitle">Regístrate para llevar el control de tus calificaciones</p>
 
-                    <%-- Mensaje de error enviado por el servlet (request.setAttribute("error", "...")) --%>
-                    <c:if test="${not empty error}">
-                        <div class="alert alert-error">${error}</div>
-                    </c:if>
-
                     <form id="formRegistro" action="${pageContext.request.contextPath}/Registro" method="post" novalidate>
 
                         <div class="form-row">

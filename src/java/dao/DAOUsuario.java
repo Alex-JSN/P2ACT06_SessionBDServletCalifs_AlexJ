@@ -20,7 +20,7 @@ public class DAOUsuario
      * Devuelve el código generado, para que el servlet lo mande con EmailUtil.
      */
     public String registrar(Usuario usuario)
-            throws SQLException, CorreoDuplicadoException, MatriculaDuplicadaException
+            throws SQLException, CorreoDuplicadoException, MatriculaDuplicadaException, AlumnoNoEncontradoException
     {
         if (existeCorreo(usuario.getCorreo()))
         {
@@ -31,33 +31,70 @@ public class DAOUsuario
             throw new MatriculaDuplicadaException("Ya existe una cuenta registrada con esa matrícula.");
         }
 
+        // La tabla alumnos ya viene precargada (por el administrador/control escolar).
+        // Aquí solo confirmamos que la matrícula capturada corresponda a un alumno real
+        // y que el correo coincida con el que tiene registrado, para enlazar la cuenta
+        // nueva (usuarios) con su registro académico (alumnos) mediante IdAlumno.
+        Integer idAlumno = buscarIdAlumnoPorMatriculaYCorreo(usuario.getMatricula(), usuario.getCorreo());
+        if (idAlumno == null)
+        {
+            throw new AlumnoNoEncontradoException(
+                    "La matrícula y/o el correo no coinciden con ningún alumno registrado. "
+                    + "Verifica tus datos o contacta al administrador.");
+        }
+
         String codigo = TokenUtil.generarCodigo();
         Timestamp expiracion = Timestamp.valueOf(LocalDateTime.now().plusMinutes(TokenUtil.MINUTOS_EXPIRACION));
         String hash = PasswordUtil.hashear(usuario.getContrasena());
 
         String sql = "INSERT INTO usuarios "
-                + "(Matricula, Nombre, Paterno, Materno, Correo, Contrasena, TipoUsuario, "
+                + "(IdAlumno, Matricula, Nombre, Paterno, Materno, Correo, Contrasena, TipoUsuario, "
                 + " TokenActivacion, FechaExpiracionToken) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         // Estado y EsProtegido usan su DEFAULT de la tabla ('Inactivo' y 0).
 
         try (Connection con = ConexionMySQL.getConnection();
              PreparedStatement ps = con.prepareStatement(sql))
         {
-            ps.setString(1, usuario.getMatricula());
-            ps.setString(2, usuario.getNombre());
-            ps.setString(3, usuario.getPaterno());
-            ps.setString(4, usuario.getMaterno());
-            ps.setString(5, usuario.getCorreo());
-            ps.setString(6, hash);
-            ps.setString(7, usuario.getTipoUsuario() != null ? usuario.getTipoUsuario() : "Usuario");
-            ps.setString(8, codigo);
-            ps.setTimestamp(9, expiracion);
+            ps.setInt(1, idAlumno);
+            ps.setString(2, usuario.getMatricula());
+            ps.setString(3, usuario.getNombre());
+            ps.setString(4, usuario.getPaterno());
+            ps.setString(5, usuario.getMaterno());
+            ps.setString(6, usuario.getCorreo());
+            ps.setString(7, hash);
+            ps.setString(8, usuario.getTipoUsuario() != null ? usuario.getTipoUsuario() : "Alumno");
+            ps.setString(9, codigo);
+            ps.setTimestamp(10, expiracion);
 
             ps.executeUpdate();
         }
 
         return codigo;
+    }
+
+    /**
+     * Busca en la tabla alumnos un registro cuya Matricula y Correo coincidan
+     * con los capturados en el formulario de registro. Devuelve su IdAlumno,
+     * o null si no hay coincidencia (matrícula inexistente o correo distinto).
+     */
+    private Integer buscarIdAlumnoPorMatriculaYCorreo(String matricula, String correo) throws SQLException
+    {
+        String sql = "SELECT IdAlumno FROM alumnos WHERE Matricula = ? AND Correo = ?";
+        try (Connection con = ConexionMySQL.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql))
+        {
+            ps.setString(1, matricula);
+            ps.setString(2, correo);
+            try (ResultSet rs = ps.executeQuery())
+            {
+                if (rs.next())
+                {
+                    return rs.getInt("IdAlumno");
+                }
+                return null;
+            }
+        }
     }
 
     /** Autentica por Correo + Contrasena. Lanza una excepción específica según el motivo de rechazo. */
@@ -253,6 +290,8 @@ public class DAOUsuario
     {
         Usuario u = new Usuario();
         u.setIdUsuario(rs.getInt("IdUsuario"));
+        int idAlumno = rs.getInt("IdAlumno");
+        u.setIdAlumno(rs.wasNull() ? null : idAlumno);
         u.setMatricula(rs.getString("Matricula"));
         u.setNombre(rs.getString("Nombre"));
         u.setPaterno(rs.getString("Paterno"));
@@ -280,6 +319,11 @@ public class DAOUsuario
     public static class MatriculaDuplicadaException extends Exception
     {
         public MatriculaDuplicadaException(String m) { super(m); }
+    }
+
+    public static class AlumnoNoEncontradoException extends Exception
+    {
+        public AlumnoNoEncontradoException(String m) { super(m); }
     }
 
     public static class CredencialesInvalidasException extends Exception

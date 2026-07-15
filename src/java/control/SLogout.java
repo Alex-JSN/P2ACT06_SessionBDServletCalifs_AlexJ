@@ -10,30 +10,21 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 
 /**
- * Vista de gestión de materias. Solo accesible para TipoUsuario = 'Administrador'.
+ * Cierra la sesión del usuario (Alumno o Administrador) y regresa al inicio.
  */
-@WebServlet(name = "SMaterias", urlPatterns = {"/SMaterias"})
-public class SMateria extends HttpServlet
+@WebServlet(name = "SLogout", urlPatterns = {"/Logout"})
+public class SLogout extends HttpServlet
 {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException
     {
         HttpSession session = request.getSession(false);
-
-        if (session == null || session.getAttribute("usuario") == null)
+        if (session != null)
         {
-            response.sendRedirect(request.getContextPath() + "/SLogin?vista=login");
-            return;
+            session.invalidate();
         }
-        if (!"Administrador".equals(session.getAttribute("tipoUsuario")))
-        {
-            response.sendRedirect(request.getContextPath() + "/SCalificaciones");
-            return;
-        }
-
-        response.setContentType("text/html;charset=UTF-8");
-        request.getRequestDispatcher("/materia.jsp").forward(request, response);
+        response.sendRedirect(request.getContextPath() + "/index.jsp");
     }
 
     @Override
@@ -42,4 +33,17 @@ public class SMateria extends HttpServlet
     {
         doGet(request, response);
     }
+
+
+
+    /**
+     * Returns a short description of the servlet.
+     *
+     * @return a String containing servlet description
+     */
+    @Override
+    public String getServletInfo() {
+        return "Short description";
+    }// </editor-fold>
+
 }

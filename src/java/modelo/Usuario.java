@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 public class Usuario 
 {
     private int       idUsuario;
+    private Integer   idAlumno;
     private String    matricula;
     private String    nombre;
     private String    paterno;
@@ -27,6 +28,16 @@ public class Usuario
     public void setIdUsuario(int idUsuario) 
     {
         this.idUsuario = idUsuario;
+    }
+
+    public Integer getIdAlumno()
+    {
+        return idAlumno;
+    }
+
+    public void setIdAlumno(Integer idAlumno)
+    {
+        this.idAlumno = idAlumno;
     }
 
     public String getMatricula()
