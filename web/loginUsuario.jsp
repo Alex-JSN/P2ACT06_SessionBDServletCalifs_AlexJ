@@ -18,16 +18,13 @@
     <body>
         <main class="auth-main">
             <div class="auth-container">
-                <div class="auth-line"></div>
-
                 <div class="auth-card">
                     <a href="${pageContext.request.contextPath}/index.jsp" class="back-link">&larr; Volver al inicio</a>
 
                     <h1 class="auth-title">Iniciar Sesión</h1>
-                    <p  class="auth-subtitle">Ingresa tu correo y contraseña para continuar</p>
+                    <p class="auth-subtitle">Ingresa tu correo y contraseña para continuar</p>
 
                     <form id="formLogin" action="${pageContext.request.contextPath}/Login" method="post" novalidate>
-
                         <div class="form-group">
                             <label for="correo">Correo electrónico</label>
                             <input type="email" id="correo" name="correo" placeholder="tucorreo@ejemplo.com" value="${correo}" required autocomplete="email">
@@ -37,8 +34,8 @@
                         <div class="form-group">
                             <label for="contrasena">Contraseña</label>
                             <div class="password-wrapper">
-                                <input  type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required autocomplete="current-password">
-                                <button type="button" class="toggle-password" data-target="contrasena">Ver</button>
+                                <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required autocomplete="current-password">
+                                <button type="button" class="toggle-password" data-target="contrasena" aria-label="Mostrar contraseña"></button>
                             </div>
                             <span class="field-error" id="errorContrasena">La contraseña es obligatoria.</span>
                         </div>

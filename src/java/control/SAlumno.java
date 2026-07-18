@@ -15,8 +15,7 @@ import java.io.IOException;
 @WebServlet(name = "SAlumno", urlPatterns = {"/SAlumno"}) public class SAlumno extends HttpServlet
 {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         HttpSession session = request.getSession(false);
 

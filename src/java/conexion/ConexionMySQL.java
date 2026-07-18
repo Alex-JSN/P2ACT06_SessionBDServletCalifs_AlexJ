@@ -25,9 +25,9 @@ public class ConexionMySQL
         
         servidor = "localhost";
         nombreBD = "dwi_28_ejemplo";
-        usuario = "root";
+        usuario  = "root";
         password = "Hydra2026!Dev";
-        puerto = "3306";
+        puerto   = "3306";
         
         String urlConexion = "jdbc:mysql://" + servidor + ":" + puerto + "/" + nombreBD;
         return DriverManager.getConnection( urlConexion, usuario, password);

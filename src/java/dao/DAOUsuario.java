@@ -12,14 +12,17 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-public class DAOUsuario {
+public class DAOUsuario
+{
 
-    public String registrar(Usuario usuario) throws SQLException, CorreoDuplicadoException, MatriculaDuplicadaException, AlumnoNoEncontradoException {
+    public String registrar(Usuario usuario) throws SQLException, CorreoDuplicadoException, MatriculaDuplicadaException, AlumnoNoEncontradoException
+    {
         System.out.println("=== INICIO REGISTRO ===");
         System.out.println("Matricula: " + usuario.getMatricula());
         System.out.println("Correo: " + usuario.getCorreo());
 
-        if (existeCorreo(usuario.getCorreo())) {
+        if (existeCorreo(usuario.getCorreo()))
+        {
             throw new CorreoDuplicadoException("Ya existe una cuenta registrada con ese correo.");
         }
 
@@ -31,16 +34,20 @@ public class DAOUsuario {
         String estadoInicial;
         String tipoUsuario;
 
-        if (esPrimerUsuario) {
+        if (esPrimerUsuario)
+        {
             // PRIMER USUARIO = ADMINISTRADOR (No necesita validación de matrícula)
             estadoInicial = "Activo";
-            tipoUsuario = "Administrador";
-            idAlumno = null; // No tiene IdAlumno
+            tipoUsuario   = "Administrador";
+            idAlumno      = null;
             System.out.println("PRIMER USUARIO - Administrador creado sin validación de matrícula");
-        } else {
+        }
+        else
+        {
             // Para ALUMNOS, validar que exista en la tabla alumnos
             idAlumno = buscarIdAlumnoPorMatriculaYCorreo(usuario.getMatricula(), usuario.getCorreo());
-            if (idAlumno == null) {
+            if (idAlumno == null)
+            {
                 throw new AlumnoNoEncontradoException(
                         "La matrícula y/o el correo no coinciden con ningún alumno registrado. "
                         + "Verifica tus datos o contacta al administrador.");
@@ -52,7 +59,8 @@ public class DAOUsuario {
         }
 
         // Si es alumno, validar matrícula duplicada
-        if (!esPrimerUsuario && existeMatricula(usuario.getMatricula())) {
+        if (!esPrimerUsuario && existeMatricula(usuario.getMatricula()))
+        {
             throw new MatriculaDuplicadaException("Ya existe una cuenta registrada con esa matrícula.");
         }
 
@@ -66,18 +74,25 @@ public class DAOUsuario {
                 + "Estado, TokenActivacion, FechaExpiracionToken, EsProtegido) "
                 + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
-        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql))
+        {
             // Para Administrador, IdAlumno es NULL
-            if (idAlumno != null) {
+            if (idAlumno != null)
+            {
                 ps.setInt(1, idAlumno);
-            } else {
+            }
+            else
+            {
                 ps.setNull(1, java.sql.Types.INTEGER);
             }
 
             // Para Administrador, Matricula es NULL
-            if (esPrimerUsuario) {
+            if (esPrimerUsuario)
+            {
                 ps.setNull(2, java.sql.Types.VARCHAR);
-            } else {
+            }
+            else
+            {
                 ps.setString(2, usuario.getMatricula());
             }
 
@@ -90,35 +105,38 @@ public class DAOUsuario {
             ps.setString(9, estadoInicial);
             ps.setString(10, codigo);
             ps.setTimestamp(11, expiracion);
-            ps.setBoolean(12, esPrimerUsuario); // EsProtegido = true para el Administrador
+            ps.setBoolean(12, esPrimerUsuario);
 
             int filasAfectadas = ps.executeUpdate();
             System.out.println("Filas insertadas: " + filasAfectadas);
             System.out.println("=== FIN REGISTRO ===");
-        } catch (SQLException e) {
+        } 
+        catch (SQLException e)
+        {
             System.err.println("Error SQL al registrar: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
 
-        if ("Activo".equals(estadoInicial)) {
-            return null; // No necesita verificación por correo
+        if ("Activo".equals(estadoInicial))
+        {
+            return null;
         }
 
         return codigo;
     }
 
     /**
-     * Verifica si es el primer registro en la tabla usuarios
-     */
-    /**
      * Método público para verificar si es el primer registro (usado desde el
      * servlet)
      */
-    public boolean esPrimerRegistro() throws SQLException {
+    public boolean esPrimerRegistro() throws SQLException
+    {
         String sql = "SELECT COUNT(*) FROM usuarios";
-        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
+        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql); ResultSet rs = ps.executeQuery())
+        {
+            if (rs.next())
+            {
                 return rs.getInt(1) == 0;
             }
             return true;
@@ -139,14 +157,18 @@ public class DAOUsuario {
                     "57231900100_i", "57231900102_i", "57231900104_i"
                 };
 
-        for (String m : matriculasAutoActivas) {
-            if (m.equals(matricula)) {
+        for (String m : matriculasAutoActivas) 
+        {
+            if (m.equals(matricula)) 
+            {
                 return "Activo";
             }
         }
 
-        for (String m : matriculasVerificacion) {
-            if (m.equals(matricula)) {
+        for (String m : matriculasVerificacion)
+        {
+            if (m.equals(matricula))
+            {
                 return "Inactivo";
             }
         }
@@ -154,13 +176,17 @@ public class DAOUsuario {
         return "Inactivo";
     }
 
-    private Integer buscarIdAlumnoPorMatriculaYCorreo(String matricula, String correo) throws SQLException {
+    private Integer buscarIdAlumnoPorMatriculaYCorreo(String matricula, String correo) throws SQLException
+    {
         String sql = "SELECT IdAlumno FROM alumnos WHERE Matricula = ? AND Correo = ?";
-        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql))
+        {
             ps.setString(1, matricula);
             ps.setString(2, correo);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
+            try (ResultSet rs = ps.executeQuery())
+            {
+                if (rs.next())
+                {
                     return rs.getInt("IdAlumno");
                 }
                 return null;
@@ -168,27 +194,34 @@ public class DAOUsuario {
         }
     }
 
-    public Usuario autenticar(String correo, String contrasenaPlana) throws SQLException, CredencialesInvalidasException, CuentaInactivaException, CuentaRechazadaException {
+    public Usuario autenticar(String correo, String contrasenaPlana) throws SQLException, CredencialesInvalidasException, CuentaInactivaException, CuentaRechazadaException
+    {
         String sql = "SELECT * FROM usuarios WHERE Correo = ? LIMIT 1";
 
-        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql))
+        {
             ps.setString(1, correo);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next()) {
+            try (ResultSet rs = ps.executeQuery())
+            {
+                if (!rs.next())
+                {
                     throw new CredencialesInvalidasException("Correo o contraseña incorrectos.");
                 }
 
                 String hashGuardado = rs.getString("Contrasena");
-                if (!PasswordUtil.verificar(contrasenaPlana, hashGuardado)) {
+                if (!PasswordUtil.verificar(contrasenaPlana, hashGuardado))
+                {
                     throw new CredencialesInvalidasException("Correo o contraseña incorrectos.");
                 }
 
                 String estado = rs.getString("Estado");
-                if ("Rechazado".equals(estado)) {
+                if ("Rechazado".equals(estado)) 
+                {
                     throw new CuentaRechazadaException("Tu cuenta fue rechazada por un administrador.");
                 }
-                if ("Inactivo".equals(estado)) {
+                if ("Inactivo".equals(estado))
+                {
                     throw new CuentaInactivaException("Tu cuenta aún no está verificada. Revisa el código que enviamos a tu correo.");
                 }
 
@@ -201,22 +234,27 @@ public class DAOUsuario {
      * Verifica el código de 6 dígitos capturado por el usuario. Devuelve un
      * resultado indicando éxito, código incorrecto o código expirado.
      */
-    public ResultadoVerificacion verificarCodigo(String correo, String codigoIngresado) throws SQLException {
+    public ResultadoVerificacion verificarCodigo(String correo, String codigoIngresado) throws SQLException
+    {
         String sqlSelect = "SELECT IdUsuario, TokenActivacion, FechaExpiracionToken, Estado "
                 + "FROM usuarios WHERE Correo = ?";
         String sqlUpdate = "UPDATE usuarios SET Estado = 'Activo', FechaActivacion = NOW(), "
                 + "TokenActivacion = NULL, FechaExpiracionToken = NULL WHERE IdUsuario = ?";
 
-        try (Connection con = ConexionMySQL.getConnection()) {
+        try (Connection con = ConexionMySQL.getConnection())
+        {
             int idUsuario;
             String tokenGuardado;
             Timestamp expiracion;
             String estado;
 
-            try (PreparedStatement ps = con.prepareStatement(sqlSelect)) {
+            try (PreparedStatement ps = con.prepareStatement(sqlSelect))
+            {
                 ps.setString(1, correo);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) {
+                try (ResultSet rs = ps.executeQuery())
+                {
+                    if (!rs.next())
+                    {
                         return ResultadoVerificacion.CORREO_NO_ENCONTRADO;
                     }
                     idUsuario = rs.getInt("IdUsuario");
@@ -226,17 +264,21 @@ public class DAOUsuario {
                 }
             }
 
-            if ("Activo".equals(estado)) {
+            if ("Activo".equals(estado))
+            {
                 return ResultadoVerificacion.YA_ACTIVA;
             }
-            if (tokenGuardado == null || !tokenGuardado.equals(codigoIngresado)) {
+            if (tokenGuardado == null || !tokenGuardado.equals(codigoIngresado))
+            {
                 return ResultadoVerificacion.CODIGO_INCORRECTO;
             }
-            if (expiracion == null || expiracion.before(new Timestamp(System.currentTimeMillis()))) {
+            if (expiracion == null || expiracion.before(new Timestamp(System.currentTimeMillis())))
+            {
                 return ResultadoVerificacion.CODIGO_EXPIRADO;
             }
 
-            try (PreparedStatement ps = con.prepareStatement(sqlUpdate)) {
+            try (PreparedStatement ps = con.prepareStatement(sqlUpdate))
+            {
                 ps.setInt(1, idUsuario);
                 ps.executeUpdate();
             }
@@ -250,7 +292,8 @@ public class DAOUsuario {
      * registrado (por si el anterior expiró). Devuelve {codigo, nombre}, o null
      * si el correo no existe o la cuenta ya está activa.
      */
-    public String[] reenviarCodigo(String correo) throws SQLException {
+    public String[] reenviarCodigo(String correo) throws SQLException
+    {
         String sqlSelect = "SELECT IdUsuario, Estado, Nombre FROM usuarios WHERE Correo = ?";
         String sqlUpdate = "UPDATE usuarios SET TokenActivacion = ?, FechaExpiracionToken = ? WHERE IdUsuario = ?";
 
@@ -259,10 +302,13 @@ public class DAOUsuario {
             String estado;
             String nombre;
 
-            try (PreparedStatement ps = con.prepareStatement(sqlSelect)) {
+            try (PreparedStatement ps = con.prepareStatement(sqlSelect))
+            {
                 ps.setString(1, correo);
-                try (ResultSet rs = ps.executeQuery()) {
-                    if (!rs.next()) {
+                try (ResultSet rs = ps.executeQuery())
+                {
+                    if (!rs.next())
+                    {
                         return null;
                     }
                     idUsuario = rs.getInt("IdUsuario");
@@ -271,14 +317,16 @@ public class DAOUsuario {
                 }
             }
 
-            if ("Activo".equals(estado)) {
+            if ("Activo".equals(estado))
+            {
                 return null;
             }
 
             String nuevoCodigo = TokenUtil.generarCodigo();
             Timestamp expiracion = Timestamp.valueOf(LocalDateTime.now().plusMinutes(TokenUtil.MINUTOS_EXPIRACION));
 
-            try (PreparedStatement ps = con.prepareStatement(sqlUpdate)) {
+            try (PreparedStatement ps = con.prepareStatement(sqlUpdate))
+            {
                 ps.setString(1, nuevoCodigo);
                 ps.setTimestamp(2, expiracion);
                 ps.setInt(3, idUsuario);
@@ -293,37 +341,46 @@ public class DAOUsuario {
      * Un administrador activa manualmente a un usuario, sin necesidad de
      * validar el código.
      */
-    public boolean activarPorAdministrador(int idUsuario) throws SQLException {
+    public boolean activarPorAdministrador(int idUsuario) throws SQLException
+    {
         String sql = "UPDATE usuarios SET Estado = 'Activo', FechaActivacion = NOW(), "
                 + "TokenActivacion = NULL, FechaExpiracionToken = NULL WHERE IdUsuario = ?";
 
-        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql))
+        {
             ps.setInt(1, idUsuario);
             return ps.executeUpdate() == 1;
         }
     }
 
-    private boolean existeCorreo(String correo) throws SQLException {
+    private boolean existeCorreo(String correo) throws SQLException
+    {
         String sql = "SELECT 1 FROM usuarios WHERE Correo = ?";
-        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql))
+        {
             ps.setString(1, correo);
-            try (ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery())
+            {
                 return rs.next();
             }
         }
     }
 
-    private boolean existeMatricula(String matricula) throws SQLException {
+    private boolean existeMatricula(String matricula) throws SQLException
+    {
         String sql = "SELECT 1 FROM usuarios WHERE Matricula = ?";
-        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql)) {
+        try (Connection con = ConexionMySQL.getConnection(); PreparedStatement ps = con.prepareStatement(sql))
+        {
             ps.setString(1, matricula);
-            try (ResultSet rs = ps.executeQuery()) {
+            try (ResultSet rs = ps.executeQuery())
+            {
                 return rs.next();
             }
         }
     }
 
-    private Usuario mapearUsuario(ResultSet rs) throws SQLException {
+    private Usuario mapearUsuario(ResultSet rs) throws SQLException
+    {
         Usuario u = new Usuario();
         u.setIdUsuario(rs.getInt("IdUsuario"));
         int idAlumno = rs.getInt("IdAlumno");
@@ -338,52 +395,58 @@ public class DAOUsuario {
         u.setEsProtegido(rs.getInt("EsProtegido") == 1);
         u.setFechaRegistro(rs.getTimestamp("FechaRegistro"));
         u.setFechaActivacion(rs.getTimestamp("FechaActivacion"));
-        // Nunca se regresa la contraseña/hash al resto de la aplicación.
         return u;
     }
 
-    public enum ResultadoVerificacion {
+    public enum ResultadoVerificacion
+    {
         EXITO, CODIGO_INCORRECTO, CODIGO_EXPIRADO, YA_ACTIVA, CORREO_NO_ENCONTRADO
     }
 
-    public static class CorreoDuplicadoException extends Exception {
-
-        public CorreoDuplicadoException(String m) {
+    public static class CorreoDuplicadoException extends Exception
+    {
+        public CorreoDuplicadoException(String m)
+        {
             super(m);
         }
     }
 
-    public static class MatriculaDuplicadaException extends Exception {
-
-        public MatriculaDuplicadaException(String m) {
+    public static class MatriculaDuplicadaException extends Exception
+    {
+        public MatriculaDuplicadaException(String m)
+        {
             super(m);
         }
     }
 
-    public static class AlumnoNoEncontradoException extends Exception {
-
-        public AlumnoNoEncontradoException(String m) {
+    public static class AlumnoNoEncontradoException extends Exception
+    {
+        public AlumnoNoEncontradoException(String m)
+        {
             super(m);
         }
     }
 
-    public static class CredencialesInvalidasException extends Exception {
-
-        public CredencialesInvalidasException(String m) {
+    public static class CredencialesInvalidasException extends Exception
+    {
+        public CredencialesInvalidasException(String m)
+        {
             super(m);
         }
     }
 
-    public static class CuentaInactivaException extends Exception {
-
-        public CuentaInactivaException(String m) {
+    public static class CuentaInactivaException extends Exception
+    {
+        public CuentaInactivaException(String m)
+        {
             super(m);
         }
     }
 
-    public static class CuentaRechazadaException extends Exception {
-
-        public CuentaRechazadaException(String m) {
+    public static class CuentaRechazadaException extends Exception
+    {
+        public CuentaRechazadaException(String m)
+        {
             super(m);
         }
     }
