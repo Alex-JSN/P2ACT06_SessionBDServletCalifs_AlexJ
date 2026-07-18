@@ -20,14 +20,12 @@ import java.sql.SQLException;
  * (router de vistas, mapeado a /SLogin). Este servlet es el que de verdad
  * valida contra la base de datos y abre la sesión.
  */
-@WebServlet(name = "SAutenticarUsuario", urlPatterns = {"/Login"})
-public class SAutenticarUsuario extends HttpServlet
+@WebServlet(name = "SAutenticarUsuario", urlPatterns = {"/Login"}) public class SAutenticarUsuario extends HttpServlet
 {
     private final DAOUsuario daoUsuario = new DAOUsuario();
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
@@ -97,8 +95,7 @@ public class SAutenticarUsuario extends HttpServlet
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         response.sendRedirect(request.getContextPath() + "/loginUsuario.jsp");
     }

@@ -13,12 +13,10 @@ import java.io.IOException;
  * Landing page a la que llega un usuario con TipoUsuario = 'Administrador'
  * después de iniciar sesión (ver SAutenticarUsuario).
  */
-@WebServlet(name = "SPanelAdmin", urlPatterns = {"/PanelAdmin"})
-public class SPanelAdmin extends HttpServlet
+@WebServlet(name = "SPanelAdmin", urlPatterns = {"/PanelAdmin"}) public class SPanelAdmin extends HttpServlet
 {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         HttpSession session = request.getSession(false);
 
@@ -40,8 +38,7 @@ public class SPanelAdmin extends HttpServlet
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         doGet(request, response);
     }

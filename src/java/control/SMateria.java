@@ -12,12 +12,10 @@ import java.io.IOException;
 /**
  * Vista de gestión de materias. Solo accesible para TipoUsuario = 'Administrador'.
  */
-@WebServlet(name = "SMaterias", urlPatterns = {"/SMaterias"})
-public class SMateria extends HttpServlet
+@WebServlet(name = "SMaterias", urlPatterns = {"/SMaterias"}) public class SMateria extends HttpServlet
 {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         HttpSession session = request.getSession(false);
 
@@ -37,8 +35,7 @@ public class SMateria extends HttpServlet
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         doGet(request, response);
     }

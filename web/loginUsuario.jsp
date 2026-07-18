@@ -1,4 +1,13 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%
+    String mensajeExito = (String) session.getAttribute("mensajeExito");
+    if (mensajeExito != null) {
+%>
+    <div class="mensaje-exito"><%= mensajeExito %></div>
+<%
+        session.removeAttribute("mensajeExito");
+    }
+%>
 <!DOCTYPE html>
 <html>
     <head>
@@ -15,7 +24,7 @@
                     <a href="${pageContext.request.contextPath}/index.jsp" class="back-link">&larr; Volver al inicio</a>
 
                     <h1 class="auth-title">Iniciar Sesión</h1>
-                    <p class="auth-subtitle">Ingresa tu correo y contraseña para continuar</p>
+                    <p  class="auth-subtitle">Ingresa tu correo y contraseña para continuar</p>
 
                     <form id="formLogin" action="${pageContext.request.contextPath}/Login" method="post" novalidate>
 
@@ -28,18 +37,16 @@
                         <div class="form-group">
                             <label for="contrasena">Contraseña</label>
                             <div class="password-wrapper">
-                                <input type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required autocomplete="current-password">
+                                <input  type="password" id="contrasena" name="contrasena" placeholder="Tu contraseña" required autocomplete="current-password">
                                 <button type="button" class="toggle-password" data-target="contrasena">Ver</button>
                             </div>
                             <span class="field-error" id="errorContrasena">La contraseña es obligatoria.</span>
                         </div>
 
-                        <button type="submit" class="btn-auth">Entrar</button>
+                        <button type="submit" class="btn-auth">Iniciar</button>
                     </form>
 
-                    <p class="auth-footer-link">
-                        ¿No tienes cuenta? <a href="${pageContext.request.contextPath}/registroUsuario.jsp">Regístrate aquí</a>
-                    </p>
+                    <p class="auth-footer-link">¿No tienes cuenta? <a href="${pageContext.request.contextPath}/registroUsuario.jsp">Regístrate aquí</a></p>
                 </div>
             </div>
         </main>

@@ -15,12 +15,10 @@ import java.io.IOException;
  * datos de sesión; aquí es donde después se conectará el DAO de
  * calificaciones para listar Parcial1/Parcial2/Parcial3 por materia.
  */
-@WebServlet(name = "SCalificaciones", urlPatterns = {"/SCalificaciones"})
-public class SCalificacion extends HttpServlet
+@WebServlet(name = "SCalificaciones", urlPatterns = {"/SCalificaciones"}) public class SCalificacion extends HttpServlet
 {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         HttpSession session = request.getSession(false);
 
@@ -35,8 +33,7 @@ public class SCalificacion extends HttpServlet
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         doGet(request, response);
     }

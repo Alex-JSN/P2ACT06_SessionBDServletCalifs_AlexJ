@@ -12,8 +12,7 @@ import java.io.IOException;
 /**
  * Vista de "Mi perfil" del alumno (datos personales). Protegida por sesión.
  */
-@WebServlet(name = "SAlumno", urlPatterns = {"/SAlumno"})
-public class SAlumno extends HttpServlet
+@WebServlet(name = "SAlumno", urlPatterns = {"/SAlumno"}) public class SAlumno extends HttpServlet
 {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -32,8 +31,7 @@ public class SAlumno extends HttpServlet
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         doGet(request, response);
     }

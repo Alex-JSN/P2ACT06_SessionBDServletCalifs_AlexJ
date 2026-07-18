@@ -14,109 +14,128 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.SQLException;
 
-/**
- * Procesa el POST de registroUsuario.jsp (action="/Registro"):
- *   matricula, correo, nombre, paterno, materno, contrasena, confirmarContrasena
- *
- * OJO: esto NO es lo mismo que SLogin. SLogin solo decide qué JSP mostrar
- * (router de vistas, mapeado a /SLogin). Este servlet es el que de verdad
- * habla con la base de datos para crear al usuario.
- */
 @WebServlet(name = "SRegistrarUsuario", urlPatterns = {"/Registro"})
-public class SRegistrarUsuario extends HttpServlet
-{
+public class SRegistrarUsuario extends HttpServlet {
+
     private final DAOUsuario daoUsuario = new DAOUsuario();
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
-    {
-        request.setCharacterEncoding("UTF-8");
-        response.setContentType("text/html;charset=UTF-8");
+protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    request.setCharacterEncoding("UTF-8");
+    response.setContentType("text/html;charset=UTF-8");
 
-        String matricula = request.getParameter("matricula");
-        String correo = request.getParameter("correo");
-        String nombre = request.getParameter("nombre");
-        String paterno = request.getParameter("paterno");
-        String materno = request.getParameter("materno");
-        String contrasena = request.getParameter("contrasena");
-        String confirmarContrasena = request.getParameter("confirmarContrasena");
+    String matricula = request.getParameter("matricula");
+    String correo = request.getParameter("correo");
+    String nombre = request.getParameter("nombre");
+    String paterno = request.getParameter("paterno");
+    String materno = request.getParameter("materno");
+    String contrasena = request.getParameter("contrasena");
+    String confirmarContrasena = request.getParameter("confirmarContrasena");
 
-        if (esVacio(matricula) || esVacio(correo) || esVacio(nombre) || esVacio(paterno)
-                || esVacio(materno) || esVacio(contrasena))
-        {
-            reenviarConError(request, response, "Todos los campos son obligatorios.",
+    System.out.println("=== REGISTRO RECIBIDO ===");
+    System.out.println("Correo: " + correo);
+    System.out.println("Nombre: " + nombre);
+
+    // Validaciones básicas
+    if (esVacio(correo) || esVacio(nombre) || esVacio(paterno) || esVacio(contrasena)) {
+        reenviarConError(request, response, "Todos los campos son obligatorios.",
+                matricula, correo, nombre, paterno, materno);
+        return;
+    }
+
+    if (!contrasena.equals(confirmarContrasena)) {
+        reenviarConError(request, response, "Las contraseñas no coinciden.",
+                matricula, correo, nombre, paterno, materno);
+        return;
+    }
+
+    if (contrasena.length() < 8) {
+        reenviarConError(request, response, "La contraseña debe tener al menos 8 caracteres.",
+                matricula, correo, nombre, paterno, materno);
+        return;
+    }
+
+    // Verificar si es el primer usuario (antes de crear el objeto)
+    boolean esPrimerUsuario;
+    try {
+        esPrimerUsuario = daoUsuario.esPrimerRegistro();
+    } catch (SQLException e) {
+        e.printStackTrace();
+        reenviarConError(request, response, "Error al verificar el sistema. Intenta más tarde.",
+                matricula, correo, nombre, paterno, materno);
+        return;
+    }
+
+    Usuario usuario = new Usuario();
+    usuario.setCorreo(correo.trim().toLowerCase());
+    usuario.setNombre(nombre.trim());
+    usuario.setPaterno(paterno.trim());
+    usuario.setMaterno(materno.trim());
+    usuario.setContrasena(contrasena);
+    
+    // Si es el primer usuario, no necesita matrícula
+    if (!esPrimerUsuario) {
+        // Para alumnos, la matrícula es obligatoria
+        if (esVacio(matricula)) {
+            reenviarConError(request, response, "La matrícula es obligatoria para alumnos.",
                     matricula, correo, nombre, paterno, materno);
             return;
         }
-
-        if (!contrasena.equals(confirmarContrasena))
-        {
-            reenviarConError(request, response, "Las contraseñas no coinciden.",
-                    matricula, correo, nombre, paterno, materno);
-            return;
-        }
-
-        if (contrasena.length() < 8)
-        {
-            reenviarConError(request, response, "La contraseña debe tener al menos 8 caracteres.",
-                    matricula, correo, nombre, paterno, materno);
-            return;
-        }
-
-        Usuario usuario = new Usuario();
         usuario.setMatricula(matricula.trim());
-        usuario.setCorreo(correo.trim().toLowerCase());
-        usuario.setNombre(nombre.trim());
-        usuario.setPaterno(paterno.trim());
-        usuario.setMaterno(materno.trim());
-        usuario.setContrasena(contrasena);
         usuario.setTipoUsuario("Alumno");
+    } else {
+        // El primer usuario es Administrador
+        usuario.setMatricula(null);
+        usuario.setTipoUsuario("Administrador");
+        System.out.println("PRIMER USUARIO - Será Administrador");
+    }
 
-        try
-        {
-            String codigo = daoUsuario.registrar(usuario);
+    try {
+        String codigo = daoUsuario.registrar(usuario);
 
-            try
-            {
+        HttpSession session = request.getSession(true);
+        
+        if (codigo != null) {
+            // Alumno necesita verificación por correo
+            try {
                 EmailUtil.enviarCorreoVerificacion(usuario.getCorreo(), usuario.getNombre(), codigo);
-            }
-            catch (RuntimeException ex)
-            {
+            } catch (RuntimeException ex) {
                 ex.printStackTrace();
             }
 
-            HttpSession session = request.getSession(true);
             session.setAttribute("correoPendienteVerificacion", usuario.getCorreo());
-
+            session.setAttribute("mensajeExito", "Cuenta creada. Revisa tu correo para activarla.");
             response.sendRedirect(request.getContextPath() + "/VerificarCuenta");
-
+            
+        } else {
+            // Usuario activado automáticamente (Administrador o alumno auto-activado)
+            if (usuario.getTipoUsuario().equals("Administrador")) {
+                session.setAttribute("mensajeExito", 
+                    "¡Bienvenido Administrador! Has sido registrado exitosamente. Ahora puedes iniciar sesión.");
+            } else {
+                session.setAttribute("mensajeExito", 
+                    "¡Cuenta activada exitosamente! Ahora puedes iniciar sesión.");
+            }
+            
+            response.sendRedirect(request.getContextPath() + "/SLogin?vista=login");
         }
-        catch (DAOUsuario.CorreoDuplicadoException | DAOUsuario.MatriculaDuplicadaException
-                | DAOUsuario.AlumnoNoEncontradoException e)
-        {
-            reenviarConError(request, response, e.getMessage(), matricula, correo, nombre, paterno, materno);
-
-        }
-        catch (SQLException e)
-        {
-            e.printStackTrace();
-            reenviarConError(request, response, "Ocurrió un error al registrar tu cuenta. Intenta más tarde.",
-                    matricula, correo, nombre, paterno, materno);
-        }
+        
+    } catch (DAOUsuario.CorreoDuplicadoException | DAOUsuario.MatriculaDuplicadaException
+            | DAOUsuario.AlumnoNoEncontradoException e) {
+        reenviarConError(request, response, e.getMessage(), matricula, correo, nombre, paterno, materno);
+    } catch (SQLException e) {
+        e.printStackTrace();
+        reenviarConError(request, response, "Ocurrió un error al registrar tu cuenta. Intenta más tarde.",
+                matricula, correo, nombre, paterno, materno);
     }
+}
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
-    {
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         response.sendRedirect(request.getContextPath() + "/registroUsuario.jsp");
     }
 
-    private void reenviarConError(HttpServletRequest request, HttpServletResponse response, String error,
-                                   String matricula, String correo, String nombre, String paterno, String materno)
-            throws ServletException, IOException
-    {
+    private void reenviarConError(HttpServletRequest request, HttpServletResponse response, String error, String matricula, String correo, String nombre, String paterno, String materno) throws ServletException, IOException {
         request.setAttribute("error", error);
         request.setAttribute("matricula", matricula);
         request.setAttribute("correo", correo);
@@ -126,8 +145,7 @@ public class SRegistrarUsuario extends HttpServlet
         request.getRequestDispatcher("/registroUsuario.jsp").forward(request, response);
     }
 
-    private boolean esVacio(String s)
-    {
+    private boolean esVacio(String s) {
         return s == null || s.trim().isEmpty();
     }
 }

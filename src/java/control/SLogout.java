@@ -12,12 +12,10 @@ import java.io.IOException;
 /**
  * Cierra la sesión del usuario (Alumno o Administrador) y regresa al inicio.
  */
-@WebServlet(name = "SLogout", urlPatterns = {"/Logout"})
-public class SLogout extends HttpServlet
+@WebServlet(name = "SLogout", urlPatterns = {"/Logout"}) public class SLogout extends HttpServlet
 {
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         HttpSession session = request.getSession(false);
         if (session != null)
@@ -28,22 +26,14 @@ public class SLogout extends HttpServlet
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         doGet(request, response);
     }
-
-
-
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
+    
     @Override
-    public String getServletInfo() {
-        return "Short description";
-    }// </editor-fold>
-
+    public String getServletInfo()
+    {
+        return "Servlet cerrar session";
+    }
 }

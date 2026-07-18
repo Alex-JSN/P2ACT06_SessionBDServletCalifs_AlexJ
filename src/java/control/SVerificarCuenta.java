@@ -34,8 +34,7 @@ import java.sql.SQLException;
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException
     {
         request.setCharacterEncoding("UTF-8");
         response.setContentType("text/html;charset=UTF-8");
@@ -105,8 +104,7 @@ import java.sql.SQLException;
         }
     }
 
-    private void reenviarCodigo(HttpServletRequest request, HttpServletResponse response, String correo)
-            throws ServletException, IOException
+    private void reenviarCodigo(HttpServletRequest request, HttpServletResponse response, String correo) throws ServletException, IOException
     {
         try
         {
